@@ -1,6 +1,3 @@
-
-default = [[1, 2, 3], [4, 0, 5], [6, 7, 8]]
-
 def main():
     print('Welcome to Danial\'s 8 puzzle solver!')
 
@@ -10,6 +7,8 @@ def main():
     inputnum = int(inputsel)
 
     # Setting up puzzle if user uses a custom puzzle
+    if inputnum == 1:
+        puzzle = [[1, 2, 3], [4, 0, 5], [6, 7, 8]]
     if inputnum == 2:
         print('Enter your puzzle, use a zero to represent the blank \n')
 
@@ -25,8 +24,19 @@ def main():
         row3 = input('Enter the third row, use spaces between numbers: ')
         row3 = row3.split(' ')
 
-        print(row1, row2, row3)
+        print('\n')
 
+        puzzle = row1, row2, row3
+
+    algo = input('Enter your choice of algorithm \n1. Uniform Cost Search '
+                 '\n2. A* with the Misplaced Tile heuristic. \n3. A* with the Manhattan distance heuristic')
+    algo = int(algo)
+
+    if algo == 1:
+
+
+def generalsearch(problem, queuefunc):
+    print('Hi')
 
 if __name__ == "__main__":
     main()
