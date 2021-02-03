@@ -33,10 +33,20 @@ def main():
     algo = int(algo)
 
     if algo == 1:
-
+        print('Hi')
 
 def generalsearch(problem, queuefunc):
-    print('Hi')
+
+    while True:
+        if goal(node.state):
+            return
+
+
+def goal(node):
+
+
+class node:
+
 
 if __name__ == "__main__":
     main()
