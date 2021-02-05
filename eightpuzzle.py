@@ -29,23 +29,47 @@ def main():
         puzzle = row1, row2, row3
 
     algo = input('Enter your choice of algorithm \n1. Uniform Cost Search '
-                 '\n2. A* with the Misplaced Tile heuristic. \n3. A* with the Manhattan distance heuristic')
+                 '\n2. A* with the Misplaced Tile heuristic. \n3. A* with the Manhattan distance heuristic\n')
     algo = int(algo)
+
+    generalsearch(puzzle, algo)
 
     if algo == 1:
         print('Hi')
 
+
 def generalsearch(problem, queuefunc):
+    n = node(problem, 0, 0)
+    q = []
+
+    q.append(n)
+
+    num, num2, num3 = 'Hi'
 
     while True:
-        if goal(node.state):
-            return
+        if len(q) == 0:
+            return 'Failure :('
+        nd = q.pop(0)
+        if goal(nd.puzzle):
+            return ('Goal!! \n\nTo solve this problem the search algorithm expanded a total of ' +
+                  str(num) + ' nodes.\nThe maximum number of nodes in the queue at any one time was '
+                  + str(num2) + '.\nThe depth of the goal node was ' + str(num3))
+        n =
 
 
-def goal(node):
+def goal(puzzle):
+    goal = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
+
+    if goal == puzzle:
+        return True
+    return False
 
 
 class node:
+    def __init__(self, puzzle, hcost, depth):
+        self.puzzle = puzzle
+        self.hcost = hcost
+        self.depth = depth
 
 
 if __name__ == "__main__":
