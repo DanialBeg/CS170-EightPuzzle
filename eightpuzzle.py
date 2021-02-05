@@ -118,7 +118,7 @@ def generalsearch(problem, algo):
 
         for i in exarr:
             if algo == 1:
-                n = node(i, depth, 1)
+                n = node(i, depth, 0)
             elif algo == 2:
                 n = node(i, depth, misplaced(i))
             elif algo == 3:
