@@ -10,7 +10,7 @@ def main():
 
     # Setting up puzzle if user uses a custom puzzle
     if inputnum == 1:
-        puzzle = [[1, 2, 3], [4, 0, 5], [6, 7, 8]]
+        puzzle = [[1, 2, 3], [4, 0, 6], [7, 5, 8]]
     if inputnum == 2:
         print('Enter your puzzle, use a zero to represent the blank \n')
 
@@ -37,10 +37,14 @@ def main():
     print(generalsearch(puzzle, algo))
 
 
-def expand(node):
+def expand(node, s):
     r = 0
     c = 0
+    count = 0
     expansionarr = []
+    # seenset = set()
+    # for l in range(len(s)):
+    #         seenset.add(s[l].puzzle)
 
     for i in range(len(node.puzzle)):
         for j in range(len(node.puzzle)):
@@ -53,25 +57,45 @@ def expand(node):
         temp = up[r][c]
         up[r][c] = up[r-1][c]
         up[r - 1][c] = temp
-        expansionarr.append(up)
+        for i in s:
+            if up == i.puzzle:
+                count += 1
+        if count == 0:
+            expansionarr.append(up)
+        count = 0
     if r < len(node.puzzle)-1:
         down = copy.deepcopy(node.puzzle)
         temp = down[r][c]
         down[r][c] = down[r+1][c]
         down[r + 1][c] = temp
-        expansionarr.append(down)
+        for i in s:
+            if down == i.puzzle:
+                count += 1
+        if count == 0:
+            expansionarr.append(down)
+        count = 0
     if c > 0:
         left = copy.deepcopy(node.puzzle)
         temp = left[r][c]
         left[r][c] = left[r][c-1]
         left[r][c-1] = temp
-        expansionarr.append(left)
+        for i in s:
+            if left == i.puzzle:
+                count += 1
+        if count == 0:
+            expansionarr.append(left)
+        count = 0
     if c < len(node.puzzle)-1:
         right = copy.deepcopy(node.puzzle)
         temp = right[r][c]
         right[r][c] = right[r][c+1]
         right[r][c+1] = temp
-        expansionarr.append(right)
+        for i in s:
+            if right == i.puzzle:
+                count += 1
+        if count == 0:
+            expansionarr.append(right)
+        count = 0
 
     # print(expansionarr)
     return expansionarr
@@ -79,8 +103,8 @@ def expand(node):
 
 def generalsearch(problem, algo):
     q = []
-    depth = 0
-    ncount = 0
+    seen = []
+    ncount = -1
     qsz = 0
     mq = -1
 
@@ -88,23 +112,22 @@ def generalsearch(problem, algo):
         h = 0
     if algo == 2:
         h = misplaced(problem)
-        # print(h)
     if algo == 3:
         h = manhattan(problem)
-        # print(h)
-    n = node(problem, depth, h)
+    n = node(problem, 0, h)
     q.append(n)
+    seen.append(n)
     qsz +=1
-
-    num, num2, num3 = 'Hi', 'Hi', 'Hi'
+    mq += 1
 
     while True:
         if len(q) == 0:
             return 'Failure :('
         nd = q.pop(0)
+        ncount += 1
         qsz -= 1
 
-        if nd.hcost == 0:
+        if goal(nd.puzzle):
             return ('Goal!! \n\nTo solve this problem the search algorithm expanded a total of ' +
                   str(ncount) + ' nodes.\nThe maximum number of nodes in the queue at any one time was '
                   + str(mq) + '.\nThe depth of the goal node was ' + str(nd.depth))
@@ -113,18 +136,18 @@ def generalsearch(problem, algo):
             print('The best state to expand with a g(n) = ' + str(nd.depth) + ' and h(n) = ' + str(nd.hcost)
                   + ' is...\n' + str(nd.puzzle) + '\tExpanding this node...\n')
 
-        exarr = expand(nd)
-        depth += 1
+        exarr = expand(nd, seen)
 
         for i in exarr:
             if algo == 1:
-                n = node(i, depth, 0)
+                n = node(i, nd.depth + 1, 0)
             elif algo == 2:
-                n = node(i, depth, misplaced(i))
+                n = node(i, nd.depth + 1, misplaced(i))
             elif algo == 3:
-                n = node(i, depth, manhattan(i))
+                n = node(i, nd.depth + 1, manhattan(i))
             q.append(n)
-            ncount += 1
+            seen.append(n)
+            # ncount += 1
             qsz += 1
         if qsz > mq:
             mq = qsz
@@ -133,11 +156,16 @@ def generalsearch(problem, algo):
 
 def sort(queue):
     for i in range(len(queue)):
-        for j in range(i, len(queue)):
+        for j in range(i+1, len(queue)):
             if queue[i].depth + queue[i].hcost > queue[j].depth + queue[j].hcost:
                 temp = queue[i]
                 queue[i] = queue[j]
                 queue[j] = temp
+            if queue[i].depth + queue[i].hcost == queue[j].depth + queue[j].hcost:
+                if queue[i].depth > queue[j].depth:
+                    temp = queue[j]
+                    queue[j] = queue[i]
+                    queue[i] = temp
     return queue
 
 
@@ -166,18 +194,22 @@ def misplaced(puzzle):
 
     for i in range(len(puzzle)):
         for j in range(len(puzzle)):
-            if int(puzzle[i][j]) != goal_pzl[i][j]:
+            if int(puzzle[i][j]) != goal_pzl[i][j] and int(puzzle[i][j]) != 0:
                 count += 1
     return count
 
 
 def goal(puzzle):
-    goal_pzl = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '0']]
-    print('Puzzle = ' + str(goal_pzl))
-    if goal_pzl == puzzle:
-        print('Yo')
-        return True
-    return False
+    goal_pzl = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
+    count = 0
+
+    for i in range(len(puzzle)):
+        for j in range(len(puzzle)):
+            if int(puzzle[i][j]) != goal_pzl[i][j]:
+                count += 1
+    if count > 0:
+        return False
+    return True
 
 
 class node:
