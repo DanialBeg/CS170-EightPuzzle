@@ -22,8 +22,11 @@ def main():
         row2 = input('Enter the second row, use spaces between numbers: ')
 
         # Getting the third row
-        row3 = input('Enter the third row, use spaces between numbers: \n')
+        row3 = input('Enter the third row, use spaces between numbers: ')
 
+        print('\n')
+
+        # Combining input into a puzzle
         row1 = row1.split(' ')
         row2 = row2.split(' ')
         row3 = row3.split(' ')
@@ -40,79 +43,83 @@ def main():
 
 
 # Function to illustrate all possible ways the 0 can be moved around legally
-def expand(node, s):
+def expand(nd, s):
     r = 0
     c = 0
     count = 0
-    expansionarr = []
 
     # Looking for position of 0 in the puzzle
-    for i in range(len(node.puzzle)):
-        for j in range(len(node.puzzle)):
-            if int(node.puzzle[i][j]) == 0:
+    for i in range(len(nd.puzzle)):
+        for j in range(len(nd.puzzle)):
+            if int(nd.puzzle[i][j]) == 0:
                 r = i
                 c = j
 
     # If not on the first row, then we can move the 0 up (row-wise)
     if r > 0:
-        up = copy.deepcopy(node.puzzle)
+        up = copy.deepcopy(nd.puzzle)
         temp = up[r][c]
         up[r][c] = up[r-1][c]
         up[r - 1][c] = temp
 
         # If we have already seen the puzzle before, there is no need to revisit it
         for i in s:
-            if up == i.puzzle:
+            if up == i:
                 count += 1
+        # If we have not seen it, as this puzzle as a child node of our parent
         if count == 0:
-            expansionarr.append(up)
+            nd.c1 = node(up)
         count = 0
 
     # If not on the last row, then we can move the 0 down (row-wise)
-    if r < len(node.puzzle)-1:
-        down = copy.deepcopy(node.puzzle)
+    if r < len(nd.puzzle)-1:
+        down = copy.deepcopy(nd.puzzle)
         temp = down[r][c]
         down[r][c] = down[r+1][c]
         down[r + 1][c] = temp
 
         # If we have already seen the puzzle before, there is no need to revisit it
         for i in s:
-            if down == i.puzzle:
+            if down == i:
                 count += 1
+        # If we have not seen it, as this puzzle as a child node of our parent
         if count == 0:
-            expansionarr.append(down)
+            nd.c2 = node(down)
         count = 0
 
     # If not on the first column, then we can move the 0 to the left (column-wise)
     if c > 0:
-        left = copy.deepcopy(node.puzzle)
+        left = copy.deepcopy(nd.puzzle)
         temp = left[r][c]
         left[r][c] = left[r][c-1]
         left[r][c-1] = temp
 
         # If we have already seen the puzzle before, there is no need to revisit it
         for i in s:
-            if left == i.puzzle:
+            if left == i:
                 count += 1
+        # If we have not seen it, as this puzzle as a child node of our parent
         if count == 0:
-            expansionarr.append(left)
+            nd.c3 = node(left)
         count = 0
 
     # If not on the last column, then we can move the 0 to the right (column-wise)
-    if c < len(node.puzzle)-1:
-        right = copy.deepcopy(node.puzzle)
+    if c < len(nd.puzzle)-1:
+        right = copy.deepcopy(nd.puzzle)
         temp = right[r][c]
         right[r][c] = right[r][c+1]
         right[r][c+1] = temp
 
         # If we have already seen the puzzle before, there is no need to revisit it
         for i in s:
-            if right == i.puzzle:
+            if right == i:
                 count += 1
+        # If we have not seen it, as this puzzle as a child node of our parent
         if count == 0:
-            expansionarr.append(right)
+            nd.c4 = node(right)
 
-    return expansionarr
+    # Return the parent node
+    return nd
 
 
 # Main "driver" program inspired by the psuedocode in the assignment PDF
@@ -137,9 +144,11 @@ def generalsearch(problem, algo):
 
     # Creating the start node, with the puzzle, depth of 0, and heuristic. We then add the node to the queue
     # and list it in the seen array.
-    n = node(problem, 0, h)
+    n = node(problem)
+    n.hcost = h
+    n.depth = 0
     q.append(n)
-    seen.append(n)
+    seen.append(n.puzzle)
     qsz +=1
     mq += 1
 
@@ -149,6 +158,7 @@ def generalsearch(problem, algo):
         # Sort the queue for the lowest h(n) + g(n)
         q = sort(q)
 
+        # If the queue is empty we can't do anything
         if len(q) == 0:
             return 'Failure :('
 
@@ -168,22 +178,28 @@ def generalsearch(problem, algo):
             print('The best state to expand with a g(n) = ' + str(nd.depth) + ' and h(n) = ' + str(nd.hcost)
                   + ' is...\n' + str(nd.puzzle) + '\tExpanding this node...\n')
 
-        # Expand all possible states from the node popped off the queue and put them in an array
-        exarr = expand(nd, seen)
+        # Expand all possible states from the node popped off the queue and put them into child nodes
+        exnd = expand(nd, seen)
 
-        # Loop through the array and create nodes based on the expanded puzzles based on heuristics chosen
+        # Loop through the array of children and modify stats based on the expanded puzzles based on heuristics chosen
         # by the user. The depth is the depth of the parent node (node popped off queue + 1).
-        for i in exarr:
-            if algo == 1:
-                n = node(i, nd.depth + 1, 0)
-            elif algo == 2:
-                n = node(i, nd.depth + 1, misplaced(i))
-            elif algo == 3:
-                n = node(i, nd.depth + 1, manhattan(i))
-            # Add these states to the queue and add them to a list of states we have now seen
-            q.append(n)
-            seen.append(n)
-            qsz += 1
+        arr = [exnd.c1, exnd.c2, exnd.c3, exnd.c4]
+        for i in arr:
+            if i is not None:
+                if algo == 1:
+                    i.depth = nd.depth + 1
+                    i.hcost = 0
+                elif algo == 2:
+                    i.depth = nd.depth + 1
+                    i.hcost = misplaced(i.puzzle)
+                elif algo == 3:
+                    i.depth = nd.depth + 1
+                    i.hcost = manhattan(i.puzzle)
+
+                # Add these states to the queue and add them to a list of states we have now seen
+                q.append(i)
+                seen.append(i.puzzle)
+                qsz += 1
 
         # Change the max queue size if it has been surpassed
         if qsz > mq:
@@ -198,6 +214,7 @@ def sort(queue):
                 temp = queue[i]
                 queue[i] = queue[j]
                 queue[j] = temp
+            # If there's a tie, then choose the node with the lower depth
             if queue[i].depth + queue[i].hcost == queue[j].depth + queue[j].hcost:
                 if queue[i].depth > queue[j].depth:
                     temp = queue[j]
@@ -252,12 +269,17 @@ def goal(puzzle):
     return True
 
 
-# Node definition, stores puzzle, depth, and heuristic cost
+# Node definition, stores puzzle, depth, heuristic cost, and 4 children
+# 4 children because we can have at most 4 sub-scenarios from a particular state of where 0 can be moved
 class node:
-    def __init__(self, puzzle, depth, hcost):
+    def __init__(self, puzzle):
         self.puzzle = puzzle
-        self.hcost = hcost
-        self.depth = depth
+        self.hcost = 0
+        self.depth = 0
+        self.c1 = None
+        self.c2 = None
+        self.c3 = None
+        self.c4 = None
 
 
 if __name__ == "__main__":
