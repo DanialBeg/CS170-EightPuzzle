@@ -123,7 +123,7 @@ def expand(nd, s):
 
 
 # Main "driver" program inspired by the psuedocode in the assignment PDF
-def generalsearch(problem, algo):
+def generalsearch(problem, heur):
 
     # Variable definition
     #     'q' is our queue, seen is all the puzzles we've seen already, ncount is nodes visited,
@@ -135,11 +135,11 @@ def generalsearch(problem, algo):
     mq = -1
 
     # Calculating heuristic based on the user inputted heuristic
-    if algo == 1:
+    if heur == 1:
         h = 0
-    if algo == 2:
+    if heur == 2:
         h = misplaced(problem)
-    if algo == 3:
+    if heur == 3:
         h = manhattan(problem)
 
     # Creating the start node, with the puzzle, depth of 0, and heuristic. We then add the node to the queue
@@ -154,7 +154,6 @@ def generalsearch(problem, algo):
 
     # Loop until we finish solving a problem
     while True:
-
         # Sort the queue for the lowest h(n) + g(n)
         q = sort(q)
 
@@ -177,6 +176,8 @@ def generalsearch(problem, algo):
         if ncount != 0:
             print('The best state to expand with a g(n) = ' + str(nd.depth) + ' and h(n) = ' + str(nd.hcost)
                   + ' is...\n' + str(nd.puzzle) + '\tExpanding this node...\n')
+        else:
+            print('\nExpanding state: ' + str(nd.puzzle) + '\n')
 
         # Expand all possible states from the node popped off the queue and put them into child nodes
         exnd = expand(nd, seen)
@@ -186,13 +187,13 @@ def generalsearch(problem, algo):
         arr = [exnd.c1, exnd.c2, exnd.c3, exnd.c4]
         for i in arr:
             if i is not None:
-                if algo == 1:
+                if heur == 1:
                     i.depth = nd.depth + 1
                     i.hcost = 0
-                elif algo == 2:
+                elif heur == 2:
                     i.depth = nd.depth + 1
                     i.hcost = misplaced(i.puzzle)
-                elif algo == 3:
+                elif heur == 3:
                     i.depth = nd.depth + 1
                     i.hcost = manhattan(i.puzzle)
 
