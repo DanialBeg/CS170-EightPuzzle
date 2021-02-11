@@ -1,4 +1,6 @@
 import copy
+import time
+import sys
 
 
 def main():
@@ -57,6 +59,7 @@ def expand(nd, s):
 
     # If not on the first row, then we can move the 0 up (row-wise)
     if r > 0:
+        # Resource used for deepcopy: https://docs.python.org/3/library/copy.html
         up = copy.deepcopy(nd.puzzle)
         temp = up[r][c]
         up[r][c] = up[r-1][c]
@@ -73,6 +76,7 @@ def expand(nd, s):
 
     # If not on the last row, then we can move the 0 down (row-wise)
     if r < len(nd.puzzle)-1:
+        # Resource used for deepcopy: https://docs.python.org/3/library/copy.html
         down = copy.deepcopy(nd.puzzle)
         temp = down[r][c]
         down[r][c] = down[r+1][c]
@@ -89,6 +93,7 @@ def expand(nd, s):
 
     # If not on the first column, then we can move the 0 to the left (column-wise)
     if c > 0:
+        # Resource used for deepcopy: https://docs.python.org/3/library/copy.html
         left = copy.deepcopy(nd.puzzle)
         temp = left[r][c]
         left[r][c] = left[r][c-1]
@@ -105,6 +110,7 @@ def expand(nd, s):
 
     # If not on the last column, then we can move the 0 to the right (column-wise)
     if c < len(nd.puzzle)-1:
+        # Resource used for deepcopy: https://docs.python.org/3/library/copy.html
         right = copy.deepcopy(nd.puzzle)
         temp = right[r][c]
         right[r][c] = right[r][c+1]
@@ -124,6 +130,10 @@ def expand(nd, s):
 
 # Main "driver" program inspired by the psuedocode in the assignment PDF
 def generalsearch(problem, heur):
+
+    # Getting the time when general search starts and setting a 15 minute (900s) duration
+    starttime = time.time()
+    duration = 900
 
     # Variable definition
     #     'q' is our queue, seen is all the puzzles we've seen already, ncount is nodes visited,
@@ -205,6 +215,12 @@ def generalsearch(problem, heur):
         # Change the max queue size if it has been surpassed
         if qsz > mq:
             mq = qsz
+
+        # If we go over the 15 minutes, have the program exit with a message saying it ran out of time
+        # Resource used to track the time + duration of program: https://www.programiz.com/python-programming/time
+        if time.time() > starttime + duration:
+            print('Ran out of time')
+            sys.exit()
 
 
 # Simple selection sort, if there is a tie it favors the node with the lower depth g(n)
