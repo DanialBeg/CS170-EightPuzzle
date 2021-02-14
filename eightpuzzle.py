@@ -13,8 +13,8 @@ def main():
 
     # Setting up puzzle if user uses a custom puzzle
     if inputnum == 1:
-        puzzle = [[1, 2, 3], [4, 0, 6], [7, 5, 8]]
-    if inputnum == 2:
+        puzzle = (['1', '2', '3'], ['4', '0', '6'], ['7', '5', '8'])
+    elif inputnum == 2:
         print('Enter your puzzle, use a zero to represent the blank \n')
 
         # Getting the first row
@@ -38,10 +38,10 @@ def main():
     # Allowing the user to choose heuristic
     algo = input('Enter your choice of algorithm \n1. Uniform Cost Search '
                  '\n2. A* with the Misplaced Tile heuristic. \n3. A* with the Manhattan distance heuristic\n')
-    algo = int(algo)
+    qf = int(algo)
 
     # Running the program and printing the output
-    print(generalsearch(puzzle, algo))
+    print(generalsearch(puzzle, qf))
 
 
 # Function to illustrate all possible ways the 0 can be moved around legally
@@ -57,56 +57,19 @@ def expand(nd, s):
                 r = i
                 c = j
 
-    # If not on the first row, then we can move the 0 up (row-wise)
-    if r > 0:
-        # Resource used for deepcopy: https://docs.python.org/3/library/copy.html
-        up = copy.deepcopy(nd.puzzle)
-        temp = up[r][c]
-        up[r][c] = up[r-1][c]
-        up[r - 1][c] = temp
-
-        # If we have already seen the puzzle before, there is no need to revisit it
-        for i in s:
-            if up == i:
-                count += 1
-        # If we have not seen it, as this puzzle as a child node of our parent
-        if count == 0:
-            nd.c1 = node(up)
-        count = 0
-
-    # If not on the last row, then we can move the 0 down (row-wise)
-    if r < len(nd.puzzle)-1:
-        # Resource used for deepcopy: https://docs.python.org/3/library/copy.html
-        down = copy.deepcopy(nd.puzzle)
-        temp = down[r][c]
-        down[r][c] = down[r+1][c]
-        down[r + 1][c] = temp
-
-        # If we have already seen the puzzle before, there is no need to revisit it
-        for i in s:
-            if down == i:
-                count += 1
-        # If we have not seen it, as this puzzle as a child node of our parent
-        if count == 0:
-            nd.c2 = node(down)
-        count = 0
+    # Used the order left -> right -> up -> down as it seems to be the order in the puzzle briefing slides
 
     # If not on the first column, then we can move the 0 to the left (column-wise)
     if c > 0:
         # Resource used for deepcopy: https://docs.python.org/3/library/copy.html
         left = copy.deepcopy(nd.puzzle)
         temp = left[r][c]
-        left[r][c] = left[r][c-1]
-        left[r][c-1] = temp
+        left[r][c] = left[r][c - 1]
+        left[r][c - 1] = temp
 
         # If we have already seen the puzzle before, there is no need to revisit it
-        for i in s:
-            if left == i:
-                count += 1
-        # If we have not seen it, as this puzzle as a child node of our parent
-        if count == 0:
-            nd.c3 = node(left)
-        count = 0
+        if left not in s:
+            nd.c1 = node(left)
 
     # If not on the last column, then we can move the 0 to the right (column-wise)
     if c < len(nd.puzzle)-1:
@@ -117,19 +80,39 @@ def expand(nd, s):
         right[r][c+1] = temp
 
         # If we have already seen the puzzle before, there is no need to revisit it
-        for i in s:
-            if right == i:
-                count += 1
-        # If we have not seen it, as this puzzle as a child node of our parent
-        if count == 0:
-            nd.c4 = node(right)
+        if right not in s:
+            nd.c2 = node(right)
+
+    # If not on the first row, then we can move the 0 up (row-wise)
+    if r > 0:
+        # Resource used for deepcopy: https://docs.python.org/3/library/copy.html
+        up = copy.deepcopy(nd.puzzle)
+        temp = up[r][c]
+        up[r][c] = up[r - 1][c]
+        up[r - 1][c] = temp
+
+        # If we have already seen the puzzle before, there is no need to revisit it
+        if up not in s:
+            nd.c3 = node(up)
+
+    # If not on the last row, then we can move the 0 down (row-wise)
+    if r < len(nd.puzzle) - 1:
+        # Resource used for deepcopy: https://docs.python.org/3/library/copy.html
+        down = copy.deepcopy(nd.puzzle)
+        temp = down[r][c]
+        down[r][c] = down[r + 1][c]
+        down[r + 1][c] = temp
+
+        # If we have already seen the puzzle before, there is no need to revisit it
+        if down not in s:
+            nd.c4 = node(down)
 
     # Return the parent node
     return nd
 
 
 # Main "driver" program inspired by the psuedocode in the assignment PDF
-def generalsearch(problem, heur):
+def generalsearch(problem, queuefunc):
 
     # Getting the time when general search starts and setting a 15 minute (900s) duration
     starttime = time.time()
@@ -145,11 +128,11 @@ def generalsearch(problem, heur):
     mq = -1
 
     # Calculating heuristic based on the user inputted heuristic
-    if heur == 1:
+    if queuefunc == 1:
         h = 0
-    if heur == 2:
+    if queuefunc == 2:
         h = misplaced(problem)
-    if heur == 3:
+    if queuefunc == 3:
         h = manhattan(problem)
 
     # Creating the start node, with the puzzle, depth of 0, and heuristic. We then add the node to the queue
@@ -165,7 +148,8 @@ def generalsearch(problem, heur):
     # Loop until we finish solving a problem
     while True:
         # Sort the queue for the lowest h(n) + g(n)
-        q = sort(q)
+        if queuefunc != 1:
+            q = sort(q)
 
         # If the queue is empty we can't do anything
         if len(q) == 0:
@@ -173,7 +157,9 @@ def generalsearch(problem, heur):
 
         # Remove the first node, increase node visited count but decrease queue size
         nd = q.pop(0)
-        ncount += 1
+        if nd.expanded is False:
+            ncount += 1
+            nd.expanded = True
         qsz -= 1
 
         # If we make it to goal state print some data
@@ -195,15 +181,16 @@ def generalsearch(problem, heur):
         # Loop through the array of children and modify stats based on the expanded puzzles based on heuristics chosen
         # by the user. The depth is the depth of the parent node (node popped off queue + 1).
         arr = [exnd.c1, exnd.c2, exnd.c3, exnd.c4]
+
         for i in arr:
             if i is not None:
-                if heur == 1:
+                if queuefunc == 1:
                     i.depth = nd.depth + 1
                     i.hcost = 0
-                elif heur == 2:
+                elif queuefunc == 2:
                     i.depth = nd.depth + 1
                     i.hcost = misplaced(i.puzzle)
-                elif heur == 3:
+                elif queuefunc == 3:
                     i.depth = nd.depth + 1
                     i.hcost = manhattan(i.puzzle)
 
@@ -224,20 +211,20 @@ def generalsearch(problem, heur):
 
 
 # Simple selection sort, if there is a tie it favors the node with the lower depth g(n)
-def sort(queue):
-    for i in range(len(queue)):
-        for j in range(i+1, len(queue)):
-            if queue[i].depth + queue[i].hcost > queue[j].depth + queue[j].hcost:
-                temp = queue[i]
-                queue[i] = queue[j]
-                queue[j] = temp
+def sort(q):
+    for i in range(len(q)):
+        for j in range(i+1, len(q)):
+            if q[i].depth + q[i].hcost > q[j].depth + q[j].hcost:
+                temp = q[i]
+                q[i] = q[j]
+                q[j] = temp
             # If there's a tie, then choose the node with the lower depth
-            if queue[i].depth + queue[i].hcost == queue[j].depth + queue[j].hcost:
-                if queue[i].depth > queue[j].depth:
-                    temp = queue[j]
-                    queue[j] = queue[i]
-                    queue[i] = temp
-    return queue
+            if q[i].depth + q[i].hcost == q[j].depth + q[j].hcost:
+                if q[i].depth > q[j].depth:
+                    temp = q[j]
+                    q[j] = q[i]
+                    q[i] = temp
+    return q
 
 
 # Go through the goal puzzle and sum the # of moves needed to return pieces 1-9 to their original spot
@@ -274,16 +261,11 @@ def misplaced(puzzle):
 
 # Check if the input puzzle matches the goal puzzle
 def goal(puzzle):
-    goal_pzl = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
-    count = 0
+    goal_pzl = (['1', '2', '3'], ['4', '5', '6'], ['7', '8', '0'])
 
-    for i in range(len(puzzle)):
-        for j in range(len(puzzle)):
-            if int(puzzle[i][j]) != goal_pzl[i][j]:
-                count += 1
-    if count > 0:
-        return False
-    return True
+    if puzzle == goal_pzl:
+        return True
+    return False
 
 
 # Node definition, stores puzzle, depth, heuristic cost, and 4 children
@@ -297,6 +279,7 @@ class node:
         self.c2 = None
         self.c3 = None
         self.c4 = None
+        self.expanded = False
 
 
 if __name__ == "__main__":
