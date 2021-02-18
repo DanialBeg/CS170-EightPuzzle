@@ -1,18 +1,25 @@
 Welcome to Danial's 8 puzzle solver!
 Please type “1” to use a default puzzle, or “2” to enter your own puzzle! Please be sure to press ENTER after making your choice!
-1
-Enter your choice of algorithm
-1. Uniform Cost Search
-2. A* with the Misplaced Tile heuristic.
+2
+Enter your puzzle, use a zero to represent the blank 
+
+Enter the first row, use spaces between numbers: 1 2 3
+Enter the second row, use spaces between numbers: 4 0 6
+Enter the third row, use spaces between numbers: 7 5 8
+
+
+Enter your choice of algorithm 
+1. Uniform Cost Search 
+2. A* with the Misplaced Tile heuristic. 
 3. A* with the Manhattan distance heuristic
 3
 
-Expanding state: [[1, 2, 3], [4, 0, 6], [7, 5, 8]]
+Expanding state: (['1', '2', '3'], ['4', '0', '6'], ['7', '5', '8'])
 
 The best state to expand with a g(n) = 1 and h(n) = 1 is...
-[[1, 2, 3], [4, 5, 6], [7, 0, 8]]       Expanding this node...
+(['1', '2', '3'], ['4', '5', '6'], ['7', '0', '8'])	Expanding this node...
 
-Goal!!
+Goal!! 
 
 To solve this problem the search algorithm expanded a total of 2 nodes.
 The maximum number of nodes in the queue at any one time was 5.

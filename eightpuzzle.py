@@ -48,7 +48,6 @@ def main():
 def expand(nd, s):
     r = 0
     c = 0
-    count = 0
 
     # Looking for position of 0 in the puzzle
     for i in range(len(nd.puzzle)):
@@ -141,6 +140,13 @@ def generalsearch(problem, queuefunc):
     n.hcost = h
     n.depth = 0
     q.append(n)
+    c = 0
+    for i in n.puzzle:
+        i = tuple(i)
+        print(i)
+        c += 1
+    print(n.puzzle)
+
     seen.append(n.puzzle)
     qsz +=1
     mq += 1
@@ -149,7 +155,9 @@ def generalsearch(problem, queuefunc):
     while True:
         # Sort the queue for the lowest h(n) + g(n)
         if queuefunc != 1:
-            q = sort(q)
+            # Utilizing a lambda function instead to make sorting faster - sorts by lowest h(n) + g(n)
+            # and by depth if there's a tie
+            q = sorted(q, key=lambda x: (x.depth + x.hcost, x.depth))
 
         # If the queue is empty we can't do anything
         if len(q) == 0:
@@ -166,7 +174,8 @@ def generalsearch(problem, queuefunc):
         if goal(nd.puzzle):
             return ('Goal!! \n\nTo solve this problem the search algorithm expanded a total of ' +
                   str(ncount) + ' nodes.\nThe maximum number of nodes in the queue at any one time was '
-                  + str(mq) + '.\nThe depth of the goal node was ' + str(nd.depth))
+                  + str(mq) + '.\nThe depth of the goal node was ' + str(nd.depth) + '\n\nCPU Time: ' +
+                    str(time.time()-starttime) + ' seconds')
 
         # Skipping on the first occasion to allow it to first decide which node is best to expand
         if ncount != 0:
@@ -210,23 +219,6 @@ def generalsearch(problem, queuefunc):
             sys.exit()
 
 
-# Simple selection sort, if there is a tie it favors the node with the lower depth g(n)
-def sort(q):
-    for i in range(len(q)):
-        for j in range(i+1, len(q)):
-            if q[i].depth + q[i].hcost > q[j].depth + q[j].hcost:
-                temp = q[i]
-                q[i] = q[j]
-                q[j] = temp
-            # If there's a tie, then choose the node with the lower depth
-            if q[i].depth + q[i].hcost == q[j].depth + q[j].hcost:
-                if q[i].depth > q[j].depth:
-                    temp = q[j]
-                    q[j] = q[i]
-                    q[i] = temp
-    return q
-
-
 # Go through the goal puzzle and sum the # of moves needed to return pieces 1-9 to their original spot
 def manhattan(puzzle):
     goal_pzl = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
@@ -268,7 +260,7 @@ def goal(puzzle):
     return False
 
 
-# Node definition, stores puzzle, depth, heuristic cost, and 4 children
+# Node definition, stores puzzle, depth, heuristic cost, 4 children, and an expanded boolean
 # 4 children because we can have at most 4 sub-scenarios from a particular state of where 0 can be moved
 class node:
     def __init__(self, puzzle):
