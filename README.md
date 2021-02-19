@@ -9,3 +9,14 @@ To run the program please typle in ```python eightpuzzle.py``` which will then a
 ## Results
 
 The following graphs show the Nodes Expanded vs. Solution Depth and Max Queue Size vs. Solution Depth respectively. Please note that Uniform Cost Search timed out after depth 20. Nodes Expanded helps us get an idea of the time complexity of the heuristics while Max Queue Size helps us get an idea of the space complexity for each heuristic.
+
+##### Nodes Expanded vs. Solution Depth:
+![alt text][nexpanded]
+
+[nexpanded]: https://github.com/DanialBeg/CS170-EightPuzzle/blob/main/nodes_expanded.png "Nodes Expanded vs. Solution Depth"
+
+
+##### Max Queue Size vs. Solution Depth:
+![alt text][mqs]
+
+[mqs]: https://github.com/DanialBeg/CS170-EightPuzzle/blob/main/max_queue_size.png "Max Queue Size vs. Solution Depth"
