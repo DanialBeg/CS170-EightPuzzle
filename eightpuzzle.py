@@ -140,12 +140,6 @@ def generalsearch(problem, queuefunc):
     n.hcost = h
     n.depth = 0
     q.append(n)
-    c = 0
-    for i in n.puzzle:
-        i = tuple(i)
-        print(i)
-        c += 1
-    print(n.puzzle)
 
     seen.append(n.puzzle)
     qsz +=1
@@ -157,6 +151,7 @@ def generalsearch(problem, queuefunc):
         if queuefunc != 1:
             # Utilizing a lambda function instead to make sorting faster - sorts by lowest h(n) + g(n)
             # and by depth if there's a tie
+            # Resource for sorting: https://docs.python.org/3/howto/sorting.html
             q = sorted(q, key=lambda x: (x.depth + x.hcost, x.depth))
 
         # If the queue is empty we can't do anything
